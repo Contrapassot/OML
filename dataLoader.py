@@ -52,7 +52,7 @@ def load_images_labels(n_batches = 5):
     
  
     
-    # print(train_images[0])
+    # print(train_images[0]) test
     
     # make labels to one_hot encoding
     encoder = OneHotEncoder()
