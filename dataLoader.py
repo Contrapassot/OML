@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 import torch
 
 # dataset site : https://www.cs.toronto.edu/~kriz/cifar.html
