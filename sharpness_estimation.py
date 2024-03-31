@@ -36,11 +36,12 @@ def generate_samples(model):
 def get_model_params(model):
     return list(model.parameters())
 
-def get_perturbed_params(original_params):
+def get_perturbed_params(original_params): # TODO does the vector norm need to be normalized for all weights at once ? 
     perturbed_params = []
     for param in original_params:
         random_vector = torch.randn(param.size()).to(device)
         # print(torch.linalg.vector_norm(random_vector))
+        print(random_vector/torch.linalg.vector_norm(random_vector))
         perturbed_params.append(param.to(device) + random_vector/torch.linalg.vector_norm(random_vector) * EPSILON)
     return perturbed_params
 

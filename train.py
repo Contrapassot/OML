@@ -39,7 +39,7 @@ def learn():
     
 
     batch_size = 256
-    num_epochs = 30
+    num_epochs = 5
     loss_values = []
     test_accuracy = []
     train_accuracy = []
