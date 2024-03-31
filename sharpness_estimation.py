@@ -8,8 +8,8 @@ import copy
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-NUM_TRIALS = 20
-EPSILON = 0.05
+NUM_TRIALS = 5
+EPSILON = 0.5
 
 
 def generate_samples(model):
@@ -39,7 +39,9 @@ def get_model_params(model):
 def get_perturbed_params(original_params):
     perturbed_params = []
     for param in original_params:
-        perturbed_params.append(param.to(device) + torch.randn(param.size()).to(device) * EPSILON)
+        random_vector = torch.randn(param.size()).to(device)
+        # print(torch.linalg.vector_norm(random_vector))
+        perturbed_params.append(param.to(device) + random_vector/torch.linalg.vector_norm(random_vector) * EPSILON)
     return perturbed_params
 
 def set_model_params(model, params):
@@ -51,8 +53,7 @@ def set_model_params(model, params):
         
 def get_loss(model, data):
     loss = 0
-    for i, data in enumerate(data):    
-        print("iteration", i)
+    for _, data in enumerate(data):   # batch size is the size of the dataset so just one iteration
         inputs, labels = data
         inputs, labels = inputs.to(device), labels.to(device)
         outputs = model(inputs)
