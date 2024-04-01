@@ -2,7 +2,7 @@
 
 import torch
 import os
-from train import learn, MLP_1
+from train import learn, get_model
 import copy
 from sharpness_estimation import get_sharpness
 import seaborn as sns
@@ -26,13 +26,13 @@ BASELINE_BATCH_SIZE = 128
 BASELINE_EFFECT = [BASELINE_LEARNING_RATE, BASELINE_BATCH_SIZE]
 
 
-def get_model_ready(class_name = MLP_1):
+def get_model_ready(class_name = 'MLP_1'):
     models = dict() # key: model name, value: model
     hyperparameters = [] # [lr, batch_size]
     
     for i, var in enumerate(EFFECT_VARIABLES):
         for k, value in enumerate(var):
-            model_name = "model"
+            model_name = class_name
             for j, baseline_effect in enumerate(BASELINE_EFFECT):
                 if i == j:
                     model_name += "_" + str(value) 
@@ -45,7 +45,7 @@ def get_model_ready(class_name = MLP_1):
                 
                 
             if os.path.exists(model_name):
-                model = MLP_1().to(device)
+                model = get_model(class_name)
                 model.load_state_dict(torch.load(model_name))
                 models[model_name] = copy.deepcopy(model)
             else:
@@ -56,14 +56,14 @@ def get_model_ready(class_name = MLP_1):
     return models
 
 
-def show_results(effect, models, effect_name):
+def show_results(effect, models, effect_name, model_class_name = 'MLP_1'):
     i = EFFECT_VARIABLES.index(effect)
     
     list_of_sharpness = []
     list_of_values = []
 
     for value in effect:
-        model_name = "model"
+        model_name = model_class_name
         for j, baseline_effect in enumerate(BASELINE_EFFECT):
             if i == j:
                 model_name += "_" + str(value) 
@@ -90,9 +90,9 @@ def show_results(effect, models, effect_name):
         
 
 if __name__ == "__main__":
-    models = get_model_ready(MLP_1)
-    show_results(LEARNING_RATES, models, "Learning Rate")
-    # show_results(BATCH_SIZES, models, "Batch Size")
+    models = get_model_ready('MLP_1')
+    # show_results(LEARNING_RATES, models, "Learning Rate", "MLP_1")
+    show_results(BATCH_SIZES, models, "Batch Size")
         
     
  
