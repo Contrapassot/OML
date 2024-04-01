@@ -17,10 +17,10 @@ STOPPING_CRITERION_EPOCHS = 5
 class MLP_1(nn.Module):
     def __init__(self):
         super(MLP_1, self).__init__()
-        self.seq = nn.Sequential(nn.Linear(3072, 512) , nn.ReLU(),
+        self.seq = nn.Sequential(nn.Linear(3072, 512), nn.ReLU(),
                                  nn.Linear(512, 256), nn.ReLU(),
-                                 nn.Linear(256, 128),  nn.ReLU(),
-                                 nn.Linear(128, 10), nn.BatchNorm1d(10))  # No softmax here ?? TODO see logits instead of one-hot encoding
+                                 nn.Linear(256, 128), nn.ReLU(),
+                                 nn.Linear(128, 10), nn.BatchNorm1d(10, affine=False))  # No softmax here ?? TODO see logits instead of one-hot encoding
   
         self.loss = nn.CrossEntropyLoss()
         self.optimizer = optim.SGD(self.parameters(), lr=1e-3)
@@ -46,7 +46,7 @@ def learn(model_name, batch_size, learning_rate):
     print(train_dataset[0][0][0])
     
 
-    num_epochs = 1_0
+    num_epochs = 1_000
     loss_values = []
     test_accuracy = []
     train_accuracy = []

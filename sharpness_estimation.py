@@ -15,7 +15,7 @@ EPSILON = 5
 def generate_samples(model):
     original_params = get_model_params(model)
     sample_losses = []
-    train_dataset, _ =  dataLoader.load_images_labels(1)
+    train_dataset, _ =  dataLoader.load_images_labels(5)
    
     data =  DataLoader(train_dataset, batch_size=len(train_dataset), shuffle=False)
     

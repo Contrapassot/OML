@@ -12,11 +12,11 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 
-# LEARNING_RATES = [1e-4, 5*1e-4, 1e-3, 5*1e-3, 1e-2, 5*1e-2, 1e-1]
-# BATCH_SIZES = [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 50_000]
+LEARNING_RATES = [1e-4, 5*1e-4, 1e-3, 5*1e-3, 1e-2, 5*1e-2, 1e-1]
+BATCH_SIZES = [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 50_000]
 
-LEARNING_RATES = [1e-4, 1e-3, 1e-2]
-BATCH_SIZES = [128, 256, 512, 1024]
+# LEARNING_RATES = [1e-4, 1e-3, 1e-2]
+# BATCH_SIZES = [128, 256, 512, 1024]
 
 EFFECT_VARIABLES = [LEARNING_RATES, BATCH_SIZES]
 
