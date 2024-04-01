@@ -26,7 +26,7 @@ BASELINE_BATCH_SIZE = 128
 BASELINE_EFFECT = [BASELINE_LEARNING_RATE, BASELINE_BATCH_SIZE]
 
 
-def get_model_ready():
+def get_model_ready(class_name = MLP_1):
     models = dict() # key: model name, value: model
     hyperparameters = [] # [lr, batch_size]
     
@@ -49,7 +49,7 @@ def get_model_ready():
                 model.load_state_dict(torch.load(model_name))
                 models[model_name] = copy.deepcopy(model)
             else:
-                model = learn(model_name=MLP_1, batch_size = hyperparameters[1], learning_rate = hyperparameters[0]) 
+                model = learn(model_name=class_name, batch_size = hyperparameters[1], learning_rate = hyperparameters[0]) 
                 torch.save(model.state_dict(), model_name)
                 models[model_name] = copy.deepcopy(model)
     
@@ -90,7 +90,7 @@ def show_results(effect, models, effect_name):
         
 
 if __name__ == "__main__":
-    models = get_model_ready()
+    models = get_model_ready(MLP_1)
     show_results(LEARNING_RATES, models, "Learning Rate")
     # show_results(BATCH_SIZES, models, "Batch Size")
         
