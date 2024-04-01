@@ -9,13 +9,13 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 NUM_TRIALS = 5
-EPSILON = 0.5
+EPSILON = 5
 
 
 def generate_samples(model):
     original_params = get_model_params(model)
     sample_losses = []
-    train_dataset, _ =  dataLoader.load_images_labels(5)
+    train_dataset, _ =  dataLoader.load_images_labels(1)
    
     data =  DataLoader(train_dataset, batch_size=len(train_dataset), shuffle=False)
     
@@ -36,13 +36,21 @@ def generate_samples(model):
 def get_model_params(model):
     return list(model.parameters())
 
-def get_perturbed_params(original_params): # TODO does the vector norm need to be normalized for all weights at once ? 
+def get_perturbed_params(original_params):
+    all_params = torch.cat([param.flatten() for param in original_params])
+    random_vector = torch.randn(all_params.size()).to(device)
+    normalized_random_vector = random_vector / torch.linalg.vector_norm(random_vector)
+
+    perturbed_params_vector = all_params + normalized_random_vector * EPSILON
+    # perturbed_params_vector = all_params + random_vector * EPSILON
+
     perturbed_params = []
+    start_index = 0
     for param in original_params:
-        random_vector = torch.randn(param.size()).to(device)
-        # print(torch.linalg.vector_norm(random_vector))
-        print(random_vector/torch.linalg.vector_norm(random_vector))
-        perturbed_params.append(param.to(device) + random_vector/torch.linalg.vector_norm(random_vector) * EPSILON)
+        end_index = start_index + param.numel()
+        perturbed_params.append(perturbed_params_vector[start_index:end_index].view_as(param))
+        start_index = end_index
+
     return perturbed_params
 
 def set_model_params(model, params):

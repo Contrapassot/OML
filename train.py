@@ -32,14 +32,14 @@ class MLP_1(nn.Module):
 def learn():
     model = MLP_1().to(device)
     model = model.type(torch.float32)
-    train_dataset, test_dataset = dataLoader.load_images_labels(5)
+    train_dataset, test_dataset = dataLoader.load_images_labels(1)
     
     print(model)
     print(train_dataset[0][0][0])
     
 
-    batch_size = 256
-    num_epochs = 5
+    batch_size = 128
+    num_epochs = 200
     loss_values = []
     test_accuracy = []
     train_accuracy = []
