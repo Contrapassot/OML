@@ -30,6 +30,8 @@ def generate_samples(model):
         # set_model_params(model, original_params)
         
         print(sample_losses)
+    
+    return sample_losses
 
 
 
@@ -72,10 +74,17 @@ def get_loss(model, data):
         
     return loss
     
-    
+def get_sharpness(model):
+    sample_losses = generate_samples(model)
+    return torch.tensor(sample_losses[1:]).mean() - sample_losses[0]
+
+
 
 if __name__ == '__main__':
     # model = MLP_1().to(device)
     # model = model.type(torch.float32)
-    model = learn()
-    generate_samples(model)
+    model = learn(MLP_1, 128, 1e-3)
+    sample_losses = generate_samples(model)
+    sharpness = get_sharpness(model)
+    
+    print(f"Sharpness: {sharpness}")
