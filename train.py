@@ -21,7 +21,7 @@ class MLP_1(nn.Module):
                                  nn.Linear(100, 10), nn.BatchNorm1d(10))  # No softmax here ?? TODO see logits instead of one-hot encoding
   
         self.loss = nn.CrossEntropyLoss()
-        self.optimizer = optim.Adam(self.parameters(), lr=1e-4)
+        self.optimizer = optim.SGD(self.parameters(), lr=1e-4)
 
     def forward(self, x):
        x = self.seq(x)
@@ -29,17 +29,19 @@ class MLP_1(nn.Module):
    
    
 # TODO make this a function of batch size, model, learning rate, etc. 
-def learn():
-    model = MLP_1().to(device)
+def learn(model_name, batch_size, learning_rate):
+    model = model_name().to(device)
     model = model.type(torch.float32)
+    model.optimizer = optim.SGD(model.parameters(), lr=learning_rate)
+    
+    
     train_dataset, test_dataset = dataLoader.load_images_labels(1)
     
     print(model)
     print(train_dataset[0][0][0])
     
 
-    batch_size = 128
-    num_epochs = 200
+    num_epochs = 30
     loss_values = []
     test_accuracy = []
     train_accuracy = []
@@ -85,4 +87,4 @@ def learn():
     
 
 if __name__ == '__main__':
-    learn()
+    learn(MLP_1, 128, 1e-4)
