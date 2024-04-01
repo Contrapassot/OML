@@ -2,6 +2,8 @@ import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 from torch.utils.data import Dataset
 import torch
+import pickle
+
 
 # dataset site : https://www.cs.toronto.edu/~kriz/cifar.html
 
@@ -21,7 +23,6 @@ class CIFAR10Dataset(Dataset):
 
 
 def unpickle(file):
-    import pickle
     with open(file, 'rb') as fo:
         dict = pickle.load(fo, encoding='bytes')
     return dict
