@@ -26,13 +26,13 @@ BASELINE_BATCH_SIZE = 128
 BASELINE_EFFECT = [BASELINE_LEARNING_RATE, BASELINE_BATCH_SIZE]
 
 
-def get_model_ready(class_name = 'MLP_1'):
+def get_model_ready(class_name = 'MLP_1', iteration_number = 0):
     models = dict() # key: model name, value: model
     hyperparameters = [] # [lr, batch_size]
     
     for i, var in enumerate(EFFECT_VARIABLES):
         for k, value in enumerate(var):
-            model_name = class_name
+            model_name = "models/" + class_name
             for j, baseline_effect in enumerate(BASELINE_EFFECT):
                 if i == j:
                     model_name += "_" + str(value) 
@@ -41,7 +41,7 @@ def get_model_ready(class_name = 'MLP_1'):
                     model_name += "_" + str(baseline_effect)
                     hyperparameters.append(baseline_effect)
                     
-            model_name += ".pt"
+            model_name += f"_{iteration_number}.pt"
                 
                 
             if os.path.exists(model_name):
@@ -70,7 +70,7 @@ def show_results(effect, models, effect_name, model_class_name = 'MLP_1'):
             else:
                 model_name += "_" + str(baseline_effect)
                     
-        model_name += ".pt"
+        model_name += "_2.pt"
         
         model = models[model_name]
         
@@ -90,7 +90,7 @@ def show_results(effect, models, effect_name, model_class_name = 'MLP_1'):
         
 
 if __name__ == "__main__":
-    models = get_model_ready('MLP_1')
+    models = get_model_ready('MLP_1', 2)
     # show_results(LEARNING_RATES, models, "Learning Rate", "MLP_1")
     show_results(BATCH_SIZES, models, "Batch Size")
         

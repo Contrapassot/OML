@@ -47,7 +47,7 @@ def learn(model_name, batch_size, learning_rate, tensorboard_path = "./tensorboa
     print(train_dataset[0][0][0])
     
 
-    num_epochs = 1_000
+    num_epochs = 2_0
     loss_values = []
     test_accuracy = []
     train_accuracy = []
@@ -122,4 +122,4 @@ def learn(model_name, batch_size, learning_rate, tensorboard_path = "./tensorboa
     
 
 if __name__ == '__main__':
-    learn(MLP_1, 128, 1e-4)
+    learn('MLP_1', 128, 1e-4)
