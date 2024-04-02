@@ -77,10 +77,13 @@ def get_loss(model, data):
         
     return loss
     
-def get_sharpness(model):
+def get_avg_sharpness(model):
     sample_losses = generate_samples(model)
     return torch.tensor(sample_losses[1:]).mean() - sample_losses[0]
 
+def get_sharpness(model):
+    sample_losses = generate_samples(model)
+    return torch.tensor(sample_losses[1:]) - sample_losses[0]
 
 
 if __name__ == '__main__':

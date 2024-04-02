@@ -7,6 +7,8 @@ import copy
 from sharpness_estimation import get_sharpness
 import seaborn as sns
 import matplotlib.pyplot as plt
+import numpy as np
+import scipy.stats as stats
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -72,6 +74,7 @@ def show_results(effect, models, effect_name, model_class_name = 'MLP_1', optimi
     
     list_of_sharpness = []
     list_of_values = []
+    errors = []
 
     for value in effect:
         model_name = "models/" + model_class_name 
@@ -84,29 +87,43 @@ def show_results(effect, models, effect_name, model_class_name = 'MLP_1', optimi
         model_name += f"_{optimizer}"
 
         
-        average_sharpness = get_average_sharpness(model_name, models, n_iterations)
+        average_sharpness, left_interval, right_interval = get_sharpness_stats(model_name, models, n_iterations)
         list_of_sharpness.append(average_sharpness)
         list_of_values.append(value)
+        errors.append((right_interval - left_interval)/2)
 
-    print(effect_name, list_of_values, list_of_sharpness)
+    # print(effect_name, list_of_values, list_of_sharpness)
+    plt.figure(figsize=(10, 6))
+    plt.errorbar(list_of_values, list_of_sharpness, yerr=errors, fmt='o', ecolor='red', capsize=5)
     sns.lineplot(x=list_of_values, y=list_of_sharpness)
     plt.xlabel(effect_name)
     plt.ylabel("Sharpness")
     plt.show()
     
 
-def get_average_sharpness(model_name, models, n_iterations):
+def get_sharpness_stats(model_name, models, n_iterations):
+    '''
+    Computes the mean and confidence interval of sharpness
+    Returns: mean, left interval, right interval
+    '''
     list_of_sharpness = []
     for i in range(n_iterations):
         complete_model_name = model_name + f"_{i}.pt"
         model = models[complete_model_name]
         sharpness = get_sharpness(model)
-        list_of_sharpness.append(sharpness.item())
-    
-    print(list_of_sharpness, sum(list_of_sharpness) / n_iterations)
-    return sum(list_of_sharpness) / n_iterations
-    
+        list_of_sharpness.extend(sharpness.item())
 
+    sharpness_values = np.array(list_of_sharpness)
+    mean_sharpness = np.mean(sharpness_values)
+    std_sharpness = np.std(sharpness_values, ddof=1) # delta degree of freedom = 1 because we are working with sampled data
+    n = len(sharpness_values)
+
+    t_value = stats.t.ppf(0.975, n - 1)  # two-tailed 95% confidence interval
+    margin_error = t_value * (std_sharpness / np.sqrt(n))
+    left_interval = mean_sharpness - margin_error
+    right_interval = mean_sharpness + margin_error
+ 
+    return mean_sharpness, left_interval, right_interval
 
     
     
