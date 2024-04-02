@@ -35,10 +35,16 @@ def get_model(name):
     if name == "MLP_1":
         return MLP_1().to(device)   
 
-def learn(model_name, batch_size, learning_rate, tensorboard_path = "./tensorboard"):
+def learn(model_name, batch_size, learning_rate, optimizer, tensorboard_path = "./tensorboard"):
     model = get_model(model_name)
     model = model.type(torch.float32)
-    model.optimizer = optim.SGD(model.parameters(), lr=learning_rate)
+
+    if optimizer == 'AdaGrad':
+        model.optimizer = optim.Adagrad(model.parameters(), lr=learning_rate)
+    elif optimizer == 'SGD':
+        model.optimizer = optim.SGD(model.parameters(), lr=learning_rate)
+    else:
+        raise ValueError("Optimizer not supported")
     
     
     train_dataset, test_dataset = dataLoader.load_images_labels(5)
