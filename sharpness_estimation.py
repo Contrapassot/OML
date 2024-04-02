@@ -4,6 +4,7 @@ from torch.utils.data import DataLoader
 from train import MLP_1, learn
 import torch.nn.functional as F
 import copy
+import numpy as np
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -41,7 +42,8 @@ def get_model_params(model):
 
 def get_perturbed_params(original_params):
     all_params = torch.cat([param.flatten() for param in original_params])
-    random_vector = torch.randn(all_params.size()).to(device)
+
+    random_vector = torch.from_numpy(np.random.randn(len(all_params))).to(device) # use numpy to save random seed for NN
     normalized_random_vector = random_vector / torch.linalg.vector_norm(random_vector)
 
     perturbed_params_vector = all_params + normalized_random_vector * EPSILON
@@ -84,7 +86,7 @@ def get_sharpness(model):
 if __name__ == '__main__':
     # model = MLP_1().to(device)
     # model = model.type(torch.float32)
-    model = learn(MLP_1, 128, 1e-3)
+    model = learn('MLP_1', 128, 1e-3, 'SGD')
     sample_losses = generate_samples(model)
     sharpness = get_sharpness(model)
     
