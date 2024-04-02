@@ -76,7 +76,7 @@ def show_results(effect, models, effect_name, model_class_name = 'MLP_1', optimi
             else:
                 model_name += "_" + str(baseline_effect)
                     
-        model_name += f"_{optimizer}_2.pt"
+        model_name += f"_{optimizer}_0.pt"
         
         model = models[model_name]
         
@@ -96,9 +96,9 @@ def show_results(effect, models, effect_name, model_class_name = 'MLP_1', optimi
         
 
 if __name__ == "__main__":
-    models = get_model_ready('MLP_1', 2)
-    show_results(LEARNING_RATES, models, "Learning Rate", "MLP_1", 'AdaGrad')
-    #show_results(BATCH_SIZES, models, "Batch Size")
+    models = get_model_ready('MLP_1', 0)
+    #show_results(LEARNING_RATES, models, "Learning Rate", "MLP_1", 'AdaGrad')
+    show_results(BATCH_SIZES, models, "Batch Size", "MLP_1", 'SGD')
         
     
  

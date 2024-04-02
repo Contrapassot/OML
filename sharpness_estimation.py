@@ -29,8 +29,9 @@ def generate_samples(model):
         
         # set_model_params(model, original_params)
         
-        print(sample_losses)
+        #print(sample_losses)
     
+    print(sample_losses)
     return sample_losses
 
 
@@ -68,7 +69,7 @@ def get_loss(model, data):
         inputs, labels = data
         inputs, labels = inputs.to(device), labels.to(device)
         outputs = model(inputs)
-        print(outputs[0:2], labels[0])
+        #print(outputs[0:2], labels[0])
         loss += model.loss(outputs, labels).item()
         # loss += model.loss(F.softmax(outputs, dim=1), labels).item()
         
