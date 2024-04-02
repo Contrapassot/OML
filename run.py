@@ -28,7 +28,12 @@ BASELINE_BATCH_SIZE = 128
 BASELINE_EFFECT = [BASELINE_LEARNING_RATE, BASELINE_BATCH_SIZE]
 
 
-
+def iterate_over_models(n_iteration, model_class_name = 'MLP_1'):
+    models = dict() # key: model name, value: model
+    for i in range(n_iteration):
+        models = models|get_model_ready(model_class_name, i)
+    
+    return models
 
 def get_model_ready(class_name = 'MLP_1', iteration_number = 0):
     models = dict() # key: model name, value: model
@@ -62,7 +67,7 @@ def get_model_ready(class_name = 'MLP_1', iteration_number = 0):
     return models
 
 
-def show_results(effect, models, effect_name, model_class_name = 'MLP_1', optimizer = 'SGD'):
+def show_results(effect, models, effect_name, model_class_name = 'MLP_1', optimizer = 'SGD', n_iterations = 5):
     i = EFFECT_VARIABLES.index(effect)
     
     list_of_sharpness = []
@@ -76,19 +81,34 @@ def show_results(effect, models, effect_name, model_class_name = 'MLP_1', optimi
             else:
                 model_name += "_" + str(baseline_effect)
                     
-        model_name += f"_{optimizer}_0.pt"
+        model_name += f"_{optimizer}"
+
         
-        model = models[model_name]
-        
-        sharpness = get_sharpness(model)
-        list_of_sharpness.append(sharpness.item())
+        average_sharpness = get_average_sharpness(model_name, models, n_iterations)
+        list_of_sharpness.append(average_sharpness)
         list_of_values.append(value)
-    
+
     print(effect_name, list_of_values, list_of_sharpness)
     sns.lineplot(x=list_of_values, y=list_of_sharpness)
     plt.xlabel(effect_name)
     plt.ylabel("Sharpness")
     plt.show()
+    
+
+def get_average_sharpness(model_name, models, n_iterations):
+    list_of_sharpness = []
+    for i in range(n_iterations):
+        complete_model_name = model_name + f"_{i}.pt"
+        model = models[complete_model_name]
+        sharpness = get_sharpness(model)
+        list_of_sharpness.append(sharpness.item())
+    
+    print(list_of_sharpness, sum(list_of_sharpness) / n_iterations)
+    return sum(list_of_sharpness) / n_iterations
+    
+
+
+    
     
     
     
@@ -96,9 +116,10 @@ def show_results(effect, models, effect_name, model_class_name = 'MLP_1', optimi
         
 
 if __name__ == "__main__":
-    models = get_model_ready('MLP_1', 0)
-    #show_results(LEARNING_RATES, models, "Learning Rate", "MLP_1", 'AdaGrad')
-    show_results(BATCH_SIZES, models, "Batch Size", "MLP_1", 'SGD')
+    n_iterations = 3
+    models = iterate_over_models(3, 'MLP_1')
+    show_results(LEARNING_RATES, models, "Learning Rate", "MLP_1", 'AdaGrad', 3)
+    #show_results(BATCH_SIZES, models, "Batch Size", "MLP_1", 'SGD', 3)
         
     
  
