@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 import dataLoader
 from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -34,7 +35,7 @@ def get_model(name):
     if name == "MLP_1":
         return MLP_1().to(device)   
 
-def learn(model_name, batch_size, learning_rate):
+def learn(model_name, batch_size, learning_rate, tensorboard_path = "./tensorboard"):
     model = get_model(model_name)
     model = model.type(torch.float32)
     model.optimizer = optim.SGD(model.parameters(), lr=learning_rate)
@@ -52,6 +53,8 @@ def learn(model_name, batch_size, learning_rate):
     train_accuracy = []
     test_loss = 0
     
+    tb_path = tensorboard_path+"/"+str(model_name)+"_batch_"+str(batch_size)+"_lr_"+str(learning_rate)
+    tb_writer = SummaryWriter(tb_path)
     
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
@@ -78,6 +81,11 @@ def learn(model_name, batch_size, learning_rate):
             num_batches = i + 1
             
         loss_values.append(epoch_loss/num_batches)
+        
+        if epoch > 1 and epoch % 10 == 0:
+            tb_writer.add_scalar("Loss", loss_values[-1], epoch)
+            tb_writer.add_scalar("Test accuracy", test_accuracy[-1], epoch)
+            tb_writer.add_scalar("Test loss", test_loss, epoch)
         
         if epoch > 1:
             if abs(loss_values[-1] - loss_values[-2]) < STOPPING_CRITERION:
@@ -108,6 +116,8 @@ def learn(model_name, batch_size, learning_rate):
         test_loss = loss.item()
         print(f"Test accuracy: {100 * correct / total}")
     
+    tb_writer.flush()
+    tb_writer.close()
     return model
     
 
