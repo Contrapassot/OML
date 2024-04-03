@@ -23,7 +23,7 @@ class MLP_1(nn.Module):
         self.seq = nn.Sequential(nn.Linear(3072, 512), nn.ReLU(),
                                  nn.Linear(512, 256), nn.ReLU(),
                                  nn.Linear(256, 128), nn.ReLU(),
-                                 nn.Linear(128, 10), nn.BatchNorm1d(10, affine=False))  # No softmax here ?? TODO see logits instead of one-hot encoding
+                                 nn.Linear(128, 10), nn.BatchNorm1d(10, affine=False, momentum=0))  # No softmax here ?? TODO see logits instead of one-hot encoding
   
         self.loss = nn.CrossEntropyLoss()
         self.optimizer = optim.SGD(self.parameters(), lr=1e-3)
@@ -134,4 +134,4 @@ def learn(model_name, batch_size, learning_rate, optimizer, tensorboard_path = "
     
 
 if __name__ == '__main__':
-    learn('MLP_1', 128, 1e-4)
+    learn('MLP_1', 128, 1e-4, 'SGD', tensorboard_path = "./tensorboard", iteration_number = 0)
