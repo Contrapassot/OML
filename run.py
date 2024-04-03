@@ -39,11 +39,11 @@ def iterate_over_models(n_iteration, model_class_name = 'MLP_1'):
 
 def get_model_ready(class_name = 'MLP_1', iteration_number = 0):
     models = dict() # key: model name, value: model
-    hyperparameters = [] # [lr, batch_size]
     
     for opt in OPTIMIZERS:
         for i, var in enumerate(EFFECT_VARIABLES):
             for k, value in enumerate(var):
+                hyperparameters = [] # [lr, batch_size]
                 model_name = "models/" + class_name
                 for j, baseline_effect in enumerate(BASELINE_EFFECT):
                     if i == j:
@@ -111,7 +111,8 @@ def get_sharpness_stats(model_name, models, n_iterations):
         complete_model_name = model_name + f"_{i}.pt"
         model = models[complete_model_name]
         sharpness = get_sharpness(model)
-        list_of_sharpness.extend(sharpness.item())
+        print(sharpness.tolist())
+        list_of_sharpness.extend(sharpness.tolist())
 
     sharpness_values = np.array(list_of_sharpness)
     mean_sharpness = np.mean(sharpness_values)
@@ -119,6 +120,7 @@ def get_sharpness_stats(model_name, models, n_iterations):
     n = len(sharpness_values)
 
     t_value = stats.t.ppf(0.975, n - 1)  # two-tailed 95% confidence interval
+    print(t_value)
     margin_error = t_value * (std_sharpness / np.sqrt(n))
     left_interval = mean_sharpness - margin_error
     right_interval = mean_sharpness + margin_error

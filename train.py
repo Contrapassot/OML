@@ -53,13 +53,14 @@ def learn(model_name, batch_size, learning_rate, optimizer, tensorboard_path = "
     print(train_dataset[0][0][0])
     
 
-    num_epochs = 2_0
+    num_epochs = 20
     loss_values = []
     test_accuracy = []
     train_accuracy = []
     test_loss = 0
     
     tb_path = tensorboard_path+"/"+str(model_name)+"_batch_"+str(batch_size)+"_lr_"+str(learning_rate)
+    print(tb_path)
     tb_writer = SummaryWriter(tb_path)
     
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
@@ -71,7 +72,7 @@ def learn(model_name, batch_size, learning_rate, optimizer, tensorboard_path = "
         epoch_loss = 0
         if epoch == num_epochs - 1:
             print("Final epoch reached, did not converge.") # TODO throw error
-            break
+            #break
         for i, data in enumerate(train_loader):
             inputs, labels = data
             inputs, labels = inputs.to(device), labels.to(device)
