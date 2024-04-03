@@ -5,6 +5,8 @@ import torch.optim as optim
 import dataLoader
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
+import os
+import shutil
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -35,7 +37,7 @@ def get_model(name):
     if name == "MLP_1":
         return MLP_1().to(device)   
 
-def learn(model_name, batch_size, learning_rate, optimizer, tensorboard_path = "./tensorboard"):
+def learn(model_name, batch_size, learning_rate, optimizer, tensorboard_path = "./tensorboard", iteration_number = 0):
     model = get_model(model_name)
     model = model.type(torch.float32)
 
@@ -59,8 +61,11 @@ def learn(model_name, batch_size, learning_rate, optimizer, tensorboard_path = "
     train_accuracy = []
     test_loss = 0
     
-    tb_path = tensorboard_path+"/"+str(model_name)+"_batch_"+str(batch_size)+"_lr_"+str(learning_rate)
+    tb_path = tensorboard_path+"/"+str(model_name)+"_lr_"+str(learning_rate)+"_batch_"+str(batch_size)+"_opt_"+str(optimizer)+"_iter_"+str(iteration_number)
     print(tb_path)
+    if os.path.exists(tb_path):
+        shutil.rmtree(tb_path)
+        
     tb_writer = SummaryWriter(tb_path)
     
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
