@@ -9,8 +9,13 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as stats
+from concurrent.futures import ProcessPoolExecutor
+import torch.multiprocessing as mp
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+if torch.cuda.is_available():
+    mp.set_start_method('spawn', force=True)
 
 
 
@@ -30,14 +35,29 @@ BASELINE_BATCH_SIZE = 128
 BASELINE_EFFECT = [BASELINE_LEARNING_RATE, BASELINE_BATCH_SIZE]
 
 
-def iterate_over_models(n_iteration, model_class_name = 'MLP_1'):
+def iterate_over_models(n_iterations, model_class_name = 'MLP_1'):
     models = dict() # key: model name, value: model
-    for i in range(n_iteration):
+    for i in range(n_iterations):
         models = models|get_model_ready(model_class_name, i)
     
     return models
 
-def get_model_ready(class_name = 'MLP_1', iteration_number = 0):
+def parallel_iteration_over_models(n_iterations, model_class_name='MLP_1', base_seed=42):
+    models = dict()
+
+    with ProcessPoolExecutor() as executor:
+        futures = []
+        for iter_nb in range(n_iterations):
+            futures.append(executor.submit(get_model_ready, model_class_name, iter_nb, base_seed))
+
+        for future in futures:
+            models = models | future.result()
+
+    return models
+
+def get_model_ready(class_name = 'MLP_1', iteration_number = 0, base_seed = 42):
+    torch.manual_seed(base_seed + iteration_number)
+    np.random.seed(base_seed + iteration_number)
     models = dict() # key: model name, value: model
     
     for opt in OPTIMIZERS:
@@ -62,7 +82,7 @@ def get_model_ready(class_name = 'MLP_1', iteration_number = 0):
                     models[model_name] = copy.deepcopy(model)
                 else:
                     model = learn(model_name=class_name, batch_size = hyperparameters[1], learning_rate = hyperparameters[0],
-                                optimizer = opt) 
+                                optimizer = opt, iteration_number = iteration_number) 
                     torch.save(model.state_dict(), model_name)
                     models[model_name] = copy.deepcopy(model)
     
@@ -127,18 +147,15 @@ def get_sharpness_stats(model_name, models, n_iterations):
  
     return mean_sharpness, left_interval, right_interval
 
-    
-    
-    
-    
-        
-        
+if __name__ == '__main__':
+    mp.set_start_method('spawn', force=True)
+    models = iterate_over_models(n_iterations=2, model_class_name='MLP_1', base_seed=42)
 
-if __name__ == "__main__":
-    n_iterations = 3
-    models = iterate_over_models(3, 'MLP_1')
-    show_results(LEARNING_RATES, models, "Learning Rate", "MLP_1", 'AdaGrad', 3)
-    #show_results(BATCH_SIZES, models, "Batch Size", "MLP_1", 'SGD', 3)
+# if __name__ == "__main__":
+#     n_iterations = 3
+#     models = iterate_over_models(3, 'MLP_1')
+#     show_results(LEARNING_RATES, models, "Learning Rate", "MLP_1", 'AdaGrad', 3)
+#     #show_results(BATCH_SIZES, models, "Batch Size", "MLP_1", 'SGD', 3)
         
     
  
