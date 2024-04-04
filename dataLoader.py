@@ -11,6 +11,7 @@ import torchvision.transforms as transforms
 
 transform = transforms.Compose(
     [transforms.ToTensor(),
+     # values of means and std : https://github.com/kuangliu/pytorch-cifar/issues/19
      transforms.Normalize(mean=[0.49139968, 0.48215841, 0.44653091], std=[0.24703223, 0.24348513, 0.26158784])])
 
 train_set = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
@@ -18,6 +19,10 @@ test_set = torchvision.datasets.CIFAR10(root='./data', train=False, download=Tru
 
 
 class CIFAR10Dataset(Dataset):
+    """
+    Custom dataset class for CIFAR-10 to handle images and labels.
+    """
+
     def __init__(self, images, labels):
         self.images = torch.from_numpy(images)
         self.labels = torch.from_numpy(labels)
@@ -30,6 +35,9 @@ class CIFAR10Dataset(Dataset):
 
 
 def unpickle(file):
+    """
+    Loads the CIFAR-10 batch file and returns the dictionary.
+    """
     with open(file, 'rb') as fo:
         dict = pickle.load(fo, encoding='bytes')
     return dict
@@ -39,6 +47,12 @@ DIR = './data/cifar-10-batches-py/'
 
 
 def load_batches():
+    """
+    Loads all train and test batches of CIFAR-10 dataset.
+
+    Returns:
+        tuple: Contains the list of training batches and the test batch.
+    """
     print(f'{DIR}data_batch_{1}')
     train_batches = [unpickle(f'{DIR}data_batch_{i}') for i in range(1, 6)]
     test_batch = unpickle(f'{DIR}test_batch')
@@ -47,6 +61,16 @@ def load_batches():
 
 
 def load_images_labels(n_batches=5):
+    """
+    Loads and prepares the CIFAR-10 images and labels for training and testing.
+
+    Args:
+        n_batches (int, optional): The number of training batches to load.
+
+    Returns:
+        tuple: A tuple containing the training dataset and the testing dataset,
+               with images normalized and labels one-hot encoded.
+   """
     train_batches, test_batch = load_batches()
 
     train_images = normalize_image(
@@ -71,6 +95,9 @@ def load_images_labels(n_batches=5):
 
 
 def normalize_image(image):
+    """
+    Normalizes the pixel values of an image to the range [0, 1].
+    """
     return image / 255.0
 
 
