@@ -11,8 +11,6 @@ import shutil
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# TODO initialize weights and biases
-# TODO Stopping criterion
 
 STOPPING_CRITERION = 1e-3
 STOPPING_CRITERION_EPOCHS = 5
@@ -37,9 +35,7 @@ def get_model(name):
     if name == "MLP_1":
         return MLP_1().to(device)   
 
-def learn(model_name, batch_size, learning_rate, optimizer, tensorboard_path = "./tensorboard", iteration_number = 0):
-    model = get_model(model_name)
-    model = model.type(torch.float32)
+def learn(model, model_name, batch_size, learning_rate, optimizer, tensorboard_path = "./tensorboard", iteration_number = 0):
 
     if optimizer == 'AdaGrad':
         model.optimizer = optim.Adagrad(model.parameters(), lr=learning_rate)

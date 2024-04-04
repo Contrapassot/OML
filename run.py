@@ -11,6 +11,8 @@ import numpy as np
 import scipy.stats as stats
 from concurrent.futures import ProcessPoolExecutor
 import torch.multiprocessing as mp
+import hashlib
+
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -35,10 +37,10 @@ BASELINE_BATCH_SIZE = 128
 BASELINE_EFFECT = [BASELINE_LEARNING_RATE, BASELINE_BATCH_SIZE]
 
 
-def iterate_over_models(n_iterations, model_class_name = 'MLP_1'):
+def iterate_over_models(n_iterations, model_class_name = 'MLP_1', base_seed=42, unit_test = False):
     models = dict() # key: model name, value: model
     for i in range(n_iterations):
-        models = models|get_model_ready(model_class_name, i)
+        models = models|get_model_ready(model_class_name, i, base_seed=base_seed, unit_test=unit_test)
     
     return models
 
@@ -55,8 +57,8 @@ def parallel_iteration_over_models(n_iterations, model_class_name='MLP_1', base_
 
     return models
 
-def get_model_ready(class_name = 'MLP_1', iteration_number = 0, base_seed = 42):
-    torch.manual_seed(base_seed + iteration_number)
+def get_model_ready(class_name = 'MLP_1', iteration_number = 0, base_seed = 42, unit_test = False):
+    #torch.manual_seed(base_seed + iteration_number)
     np.random.seed(base_seed + iteration_number)
     models = dict() # key: model name, value: model
     
@@ -65,26 +67,49 @@ def get_model_ready(class_name = 'MLP_1', iteration_number = 0, base_seed = 42):
             for k, value in enumerate(var):
                 hyperparameters = [] # [lr, batch_size]
                 model_name = "models/" + class_name
+                unit_test_model_name = "unit_test_models/" + class_name
                 for j, baseline_effect in enumerate(BASELINE_EFFECT):
                     if i == j:
                         model_name += "_" + str(value) 
+                        unit_test_model_name += "_" + str(value)
                         hyperparameters.append(value)
                     else:
                         model_name += "_" + str(baseline_effect)
+                        unit_test_model_name += "_" + str(baseline_effect)
                         hyperparameters.append(baseline_effect)
                         
                 model_name += f"_{opt}_{iteration_number}.pt"
-                    
-                    
+                unit_test_model_name += f"_{opt}_{iteration_number}.pt"
+                
+
+                seed = int(hashlib.sha1(model_name.encode()).hexdigest(), 16) % (2**32)
+                torch.manual_seed(seed + base_seed)
+
+                model = get_model(class_name) 
+                model = model.type(torch.float32)
+
+                # save the model initialization for unit testing
+                if not os.path.exists(unit_test_model_name): 
+                        torch.save(model.state_dict(), unit_test_model_name)
+                
+                # Unit test
+                if unit_test:
+                        if model_name not in models.keys():
+                            print(model_name in models.keys(), model_name, models.keys())
+                            assert torch.all(model.state_dict()[list(model.state_dict().keys())[0]] == torch.load(unit_test_model_name)[list(model.state_dict().keys())[0]])
+                            print(model.state_dict()[list(model.state_dict().keys())[0]])
+                            print("Unit test passed")
+
                 if os.path.exists(model_name):
-                    model = get_model(class_name)
                     model.load_state_dict(torch.load(model_name))
-                    models[model_name] = copy.deepcopy(model)
+
                 else:
-                    model = learn(model_name=class_name, batch_size = hyperparameters[1], learning_rate = hyperparameters[0],
+                    model = learn(model, model_name=class_name, batch_size = hyperparameters[1], learning_rate = hyperparameters[0],
                                 optimizer = opt, iteration_number = iteration_number) 
                     torch.save(model.state_dict(), model_name)
-                    models[model_name] = copy.deepcopy(model)
+
+                models[model_name] = copy.deepcopy(model)
+
     
     return models
 
@@ -149,7 +174,8 @@ def get_sharpness_stats(model_name, models, n_iterations):
 
 if __name__ == '__main__':
     mp.set_start_method('spawn', force=True)
-    models = iterate_over_models(n_iterations=2, model_class_name='MLP_1', base_seed=42)
+    models = iterate_over_models(n_iterations=2, model_class_name='MLP_1', base_seed=42, unit_test=True)
+    show_results(LEARNING_RATES, models, "Learning Rate", "MLP_1", 'AdaGrad', 2)
 
 # if __name__ == "__main__":
 #     n_iterations = 3

@@ -9,7 +9,7 @@ import numpy as np
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-NUM_TRIALS = 5
+NUM_TRIALS = 20
 EPSILON = 5
 
 

@@ -4,3 +4,5 @@
 /*.pt
 /models/*.pt
 /tensorboard/*
+/data/*
+/unit_test_models/*.pt
