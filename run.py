@@ -164,6 +164,8 @@ def show_results(effect, models, effect_name, model_class_name='MLP_1', optimize
     """
     i = EFFECT_VARIABLES.index(effect)
 
+    print(models.keys())
+
     list_of_sharpness = []
     list_of_values = []
     errors = []
@@ -228,8 +230,9 @@ def get_sharpness_stats(model_name, models, n_iterations):
 
 if __name__ == '__main__':
     mp.set_start_method('spawn', force=True)
-    models = iterate_over_models(n_iterations=2, model_class_name='MLP_1', base_seed=42, unit_test=True)
-    show_results(LEARNING_RATES, models, "Learning Rate", "MLP_1", 'AdaGrad', 2)
+    models = iterate_over_models(array_iterations=[0, 1,5,8], model_class_name='MLP_1', base_seed=42, unit_test=True)
+    #show_results(LEARNING_RATES, models, "Learning Rate", "MLP_1", 'AdaGrad', 2)
+    show_results(BATCH_SIZES, models, "Batch size", "MLP_1", 'AdaGrad', 2)
 
 # if __name__ == "__main__":
 #     n_iterations = 3

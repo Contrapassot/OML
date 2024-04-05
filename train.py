@@ -56,6 +56,7 @@ def learn(model, model_name, batch_size, learning_rate, optimizer, tensorboard_p
     between two consecutive epochs is less STOPPING_CRITERION than for STOPPING_CRITERION_EPOCHS consecutive epochs.
 
     Args:
+        model (nn.Module): The model to train.
         model_name (str): The name of the model to train.
         batch_size (int): The batch size for training.
         learning_rate (float): The learning rate for training.
