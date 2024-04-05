@@ -29,7 +29,7 @@ class MLP_1(nn.Module):
                                  nn.Linear(512, 256), nn.ReLU(),
                                  nn.Linear(256, 128), nn.ReLU(),
                                  nn.Linear(128, 10), nn.BatchNorm1d(10, affine=False,
-                                                                    momentum=0))  # No softmax here ?? TODO see logits instead of one-hot encoding
+                                                                    momentum=0))  
 
         self.loss = nn.CrossEntropyLoss()
         self.optimizer = optim.SGD(self.parameters(), lr=1e-3)

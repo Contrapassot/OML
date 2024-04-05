@@ -6,3 +6,4 @@
 /tensorboard/*
 /data/*
 /unit_test_models/*.pt
+/.DS_Store

@@ -8,8 +8,8 @@ import numpy as np
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-NUM_TRIALS = 20
-EPSILON = 5
+NUM_TRIALS = 50
+EPSILON = 0.5
 
 
 def generate_samples(model):
