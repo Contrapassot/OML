@@ -32,7 +32,7 @@ BASELINE_BATCH_SIZE = 128
 BASELINE_EFFECT = [BASELINE_LEARNING_RATE, BASELINE_BATCH_SIZE]
 
 
-def iterate_over_models(n_iterations, model_class_name='MLP_1', base_seed=42, unit_test=False):
+def iterate_over_models(array_iterations, model_class_name='MLP_1', base_seed=42, unit_test=False):
     """
     Prepares n_iterations instances of all models.
     Each model with fixed hyperparameters is prepared n_iterations times with a different seed.
@@ -45,13 +45,13 @@ def iterate_over_models(n_iterations, model_class_name='MLP_1', base_seed=42, un
         dict: A dictionary containing model names as keys and model instances as values.
     """
     models = dict()  # key: model name, value: model
-    for i in range(n_iterations):
+    for i in array_iterations:
         models = models | get_model_ready(model_class_name, i, base_seed=base_seed, unit_test=unit_test)
 
     return models
 
 
-def parallel_iteration_over_models(n_iterations, model_class_name='MLP_1', base_seed=42):
+def parallel_iteration_over_models(array_iterations, model_class_name='MLP_1', base_seed=42):
     """
     Prepares n_iterations instances of all models in parallel using multiprocessing.
     Models with different iteration number (and therefore different seeds) are processed in parallel.
@@ -68,7 +68,7 @@ def parallel_iteration_over_models(n_iterations, model_class_name='MLP_1', base_
 
     with ProcessPoolExecutor() as executor:
         futures = []
-        for iter_nb in range(n_iterations):
+        for iter_nb in array_iterations:
             futures.append(executor.submit(get_model_ready, model_class_name, iter_nb, base_seed))
 
         for future in futures:
