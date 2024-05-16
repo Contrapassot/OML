@@ -10,7 +10,7 @@ import shutil
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-STOPPING_CRITERION = 1e-3
+STOPPING_CRITERION = 1e-4
 STOPPING_CRITERION_EPOCHS = 5
 
 
@@ -76,10 +76,10 @@ def learn(model, model_name, batch_size, learning_rate, optimizer, tensorboard_p
 
     train_dataset, test_dataset = dataLoader.load_images_labels(5)
 
-    print(model)
-    print(train_dataset[0][0][0])
+    # print(model)
+    # print(train_dataset[0][0][0])
 
-    num_epochs = 20
+    num_epochs = 20_000
     loss_values = []
     test_accuracy = []
     train_accuracy = []
@@ -87,7 +87,7 @@ def learn(model, model_name, batch_size, learning_rate, optimizer, tensorboard_p
 
     tb_path = tensorboard_path + "/" + str(model_name) + "_lr_" + str(learning_rate) + "_batch_" + str(
         batch_size) + "_opt_" + str(optimizer) + "_iter_" + str(iteration_number)
-    print(tb_path)
+ 
     if os.path.exists(tb_path):
         shutil.rmtree(tb_path)
 

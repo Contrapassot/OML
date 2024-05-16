@@ -20,12 +20,12 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 if torch.cuda.is_available():
     mp.set_start_method('spawn', force=True)
 
-# LEARNING_RATES = [1e-4, 5*1e-4, 1e-3, 5*1e-3, 1e-2, 5*1e-2, 1e-1]
-# BATCH_SIZES = [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 50_000]
+LEARNING_RATES = [1e-4, 5*1e-4, 1e-3, 5*1e-3, 1e-2, 5*1e-2, 1e-1]
+BATCH_SIZES = [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 50_000]
 OPTIMIZERS = ['SGD', 'AdaGrad']
 
-LEARNING_RATES = [1e-4, 1e-3, 1e-2]
-BATCH_SIZES = [128, 256, 512, 1024]
+# LEARNING_RATES = [1e-4, 1e-3, 1e-2]
+# BATCH_SIZES = [128, 256, 512, 1024]
 
 EFFECT_VARIABLES = [LEARNING_RATES, BATCH_SIZES]
 
@@ -194,7 +194,14 @@ def show_results(effect, models, effect_name, model_class_name='MLP_1', optimize
     sns.lineplot(x=list_of_values, y=list_of_sharpness)
     plt.xlabel(effect_name)
     plt.ylabel("Sharpness")
+    
+    #save the plot
+    plt.savefig(f"results/{model_class_name}_{optimizer}_{effect_name}.png")
+    
+    
     plt.show()
+    
+    
 
 
 def get_sharpness_stats(model_name, models, n_iterations):
@@ -223,7 +230,7 @@ def get_sharpness_stats(model_name, models, n_iterations):
     n = len(sharpness_values)
 
     t_value = stats.t.ppf(0.975, n - 1)  # two-tailed 95% confidence interval
-    print(t_value)
+    # print(t_value)
     margin_error = t_value * (std_sharpness / np.sqrt(n))
     left_interval = mean_sharpness - margin_error
     right_interval = mean_sharpness + margin_error
@@ -233,12 +240,7 @@ def get_sharpness_stats(model_name, models, n_iterations):
 
 if __name__ == '__main__':
     mp.set_start_method('spawn', force=True)
-    models = iterate_over_models(array_iterations=[0,1,5,8], model_class_name='MLP_1', base_seed=42, unit_test=True)
-    show_results(LEARNING_RATES, models, "Learning Rate", "MLP_1", 'AdaGrad', 2)
+    models = iterate_over_models(array_iterations=[0,1,2,3,4,5], model_class_name='MLP_1', base_seed=42, unit_test=True) 
+    show_results(LEARNING_RATES, models, "Learning Rate", "MLP_1", 'SGD', 5)
     #show_results(BATCH_SIZES, models, "Batch size", "MLP_1", 'AdaGrad', 2)
 
-# if __name__ == "__main__":
-#     n_iterations = 3
-#     models = iterate_over_models(3, 'MLP_1')
-#     show_results(LEARNING_RATES, models, "Learning Rate", "MLP_1", 'AdaGrad', 3)
-#     #show_results(BATCH_SIZES, models, "Batch Size", "MLP_1", 'SGD', 3)
