@@ -13,15 +13,26 @@ class sharpnessResultsSaver:
             self.optimizer = optimizer
             self.n_iterations = n_iterations
             
-            assert effect is not None
-            assert effect_name is not None
-            assert list_of_sharpness is not None
-            assert list_of_values is not None
-            assert errors is not None
-            assert len(self.list_of_values) == len(self.list_of_sharpness)
-            assert len(self.list_of_values) == len(self.errors)
+            self.file_name = "results/" + model_class_name + "_" + effect_name + "_" + optimizer 
+            
+            try:
+                assert effect is not None
+                assert effect_name is not None
+                assert list_of_sharpness is not None
+                assert list_of_values is not None
+                assert errors is not None
+                assert len(self.list_of_values) == len(self.list_of_sharpness)
+                assert len(self.list_of_values) == len(self.errors)
+                if save:
+                    self.saveResultToJSON()
+                    self.results = self.getResultFromFile()
+            except:
+                if self.check_if_file_exists():
+                    self.results = self.getResultFromFile()
+                else:
+                    self.results = None
 
-            self.saveResultToJSON()
+            
 
     def saveResultToJSON(self):
         result = {
@@ -35,16 +46,22 @@ class sharpnessResultsSaver:
             "n_iterations": self.n_iterations
         }
         # save to json file
-        fileName = self.model_class_name + "_" + self.effect_name + ".json"
-        with open(f'{fileName}.json', 'w') as f:
+        
+        with open(f'{self.file_name}.json', 'w') as f:
             json.dump(result, f, indent=4)
 
     def getResultFromFile(self):
-        fileName = self.model_class_name + "_" + self.effect_name + ".json"
-        with open(f'{fileName}.json', 'r') as f:
+        with open(f'{self.file_name}.json', 'r') as f:
             result = json.load(f)
         
         return result
     
     def printResult(self):
-        fileName = self.model_class_name + "_" + self.effect_name + ".json"
+        print(self.file_name)
+    
+    def check_if_file_exists(self):
+        try:
+            with open(f'{self.file_name}.json', 'r') as f:
+                return True
+        except:
+            return False

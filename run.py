@@ -13,6 +13,7 @@ from concurrent.futures import ProcessPoolExecutor
 import torch.multiprocessing as mp
 import hashlib
 import warnings
+from resultsSaver import sharpnessResultsSaver
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -172,21 +173,37 @@ def show_results(effect, models, effect_name, model_class_name='MLP_1', optimize
     list_of_sharpness = []
     list_of_values = []
     errors = []
+    
+    saver = sharpnessResultsSaver(model_class_name=model_class_name, optimizer=optimizer, effect_name = effect_name)
+    
+    if saver.results is None:
 
-    for value in effect:
-        model_name = "models/" + model_class_name
-        for j, baseline_effect in enumerate(BASELINE_EFFECT):
-            if i == j:
-                model_name += "_" + str(value)
-            else:
-                model_name += "_" + str(baseline_effect)
+        for value in effect:
+            model_name = "models/" + model_class_name
+            for j, baseline_effect in enumerate(BASELINE_EFFECT):
+                if i == j:
+                    model_name += "_" + str(value)
+                else:
+                    model_name += "_" + str(baseline_effect)
 
-        model_name += f"_{optimizer}"
+            model_name += f"_{optimizer}"
 
-        average_sharpness, left_interval, right_interval = get_sharpness_stats(model_name, models, n_iterations)
-        list_of_sharpness.append(average_sharpness)
-        list_of_values.append(value)
-        errors.append((right_interval - left_interval) / 2)
+            average_sharpness, left_interval, right_interval = get_sharpness_stats(model_name, models, n_iterations)
+            list_of_sharpness.append(average_sharpness)
+            list_of_values.append(value)
+            errors.append((right_interval - left_interval) / 2)
+        
+        saver = sharpnessResultsSaver(effect = effect, effect_name = effect_name, list_of_sharpness = list_of_sharpness, 
+                                      list_of_values = list_of_values, errors = errors, model_class_name=model_class_name, 
+                                      optimizer=optimizer, n_iterations=n_iterations, save = True)
+        
+    
+    assert saver.results is not None
+    
+    list_of_sharpness = saver.results['list_of_sharpness']
+    list_of_values = saver.results['list_of_values']
+    errors = saver.results['errors']
+    effect_name = saver.results['effect_name']
 
     # print(effect_name, list_of_values, list_of_sharpness)
     plt.figure(figsize=(10, 6))
