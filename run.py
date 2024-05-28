@@ -55,31 +55,6 @@ def iterate_over_models(array_iterations, model_class_name='MLP_1', base_seed=42
     return models
 
 
-def parallel_iteration_over_models(array_iterations, model_class_name='MLP_1', base_seed=42):
-    """
-    Prepares n_iterations instances of all models in parallel using multiprocessing.
-    Models with different iteration number (and therefore different seeds) are processed in parallel.
-
-    Args:
-        n_iterations (int): The number of model instances to prepare. Sets the seed in get_model_ready.
-        model_class_name (str): Class name of the model to be prepared.
-        base_seed (int): The base seed for random number generation.
-
-    Returns:
-        dict: A dictionary containing model names as keys and model instances as values.
-    """
-    models = dict()
-
-    with ProcessPoolExecutor() as executor:
-        futures = []
-        for iter_nb in array_iterations:
-            futures.append(executor.submit(get_model_ready, model_class_name, iter_nb, base_seed))
-
-        for future in futures:
-            models = models | future.result()
-
-    return models
-
 
 def get_model_ready(class_name='MLP_1', iteration_number=0, base_seed=42, unit_test=False):
     """
@@ -154,7 +129,7 @@ def get_model_ready(class_name='MLP_1', iteration_number=0, base_seed=42, unit_t
     return models
 
 
-def show_results(effect, models, effect_name, model_class_name='MLP_1', optimizer='SGD', n_iterations=5):
+def run(effect, effect_name, model_class_name='MLP_1', optimizer='SGD', array_iterations=[0,1,2]):
     """
     Plots the sharpness of the models for a given hyperparameter effect.
 
@@ -167,16 +142,21 @@ def show_results(effect, models, effect_name, model_class_name='MLP_1', optimize
         n_iterations (int): The number of iterations for the model preparation.
     """
     i = EFFECT_VARIABLES.index(effect)
+    n_iterations = len(array_iterations)
 
-    print(models.keys())
+    
 
     list_of_sharpness = []
     list_of_values = []
     errors = []
+    all_sharpness_measures = []
     
     saver = sharpnessResultsSaver(model_class_name=model_class_name, optimizer=optimizer, effect_name = effect_name)
     
     if saver.results is None:
+        
+        models = iterate_over_models(array_iterations=array_iterations, model_class_name=model_class_name, base_seed=42, unit_test=True) 
+        print(models.keys())
 
         for value in effect:
             model_name = "models/" + model_class_name
@@ -188,35 +168,43 @@ def show_results(effect, models, effect_name, model_class_name='MLP_1', optimize
 
             model_name += f"_{optimizer}"
 
-            average_sharpness, left_interval, right_interval = get_sharpness_stats(model_name, models, n_iterations)
+            average_sharpness, left_interval, right_interval, all_measures = get_sharpness_stats(model_name, models, n_iterations)
             list_of_sharpness.append(average_sharpness)
             list_of_values.append(value)
             errors.append((right_interval - left_interval) / 2)
+            all_sharpness_measures.append(all_measures)
+            print(all_sharpness_measures)
         
-        saver = sharpnessResultsSaver(effect = effect, effect_name = effect_name, list_of_sharpness = list_of_sharpness, 
-                                      list_of_values = list_of_values, errors = errors, model_class_name=model_class_name, 
+        saver = sharpnessResultsSaver(effect = effect, effect_name = effect_name, list_of_sharpness_mean = list_of_sharpness, 
+                                      list_of_sharpness = all_sharpness_measures, list_of_values = list_of_values, 
+                                      errors = errors, model_class_name=model_class_name, 
                                       optimizer=optimizer, n_iterations=n_iterations, save = True)
         
     
     assert saver.results is not None
     
-    list_of_sharpness = saver.results['list_of_sharpness']
+  
+
+
+def plot_results(effect_name, model_class_name, optimizer, show_plot):
+    
+    saver = sharpnessResultsSaver(model_class_name=model_class_name, optimizer=optimizer, effect_name = effect_name)
+    
+    list_of_sharpness_mean = saver.results['list_of_sharpness_mean']
     list_of_values = saver.results['list_of_values']
     errors = saver.results['errors']
-    effect_name = saver.results['effect_name']
-
-    # print(effect_name, list_of_values, list_of_sharpness)
+   
     plt.figure(figsize=(10, 6))
-    plt.errorbar(list_of_values, list_of_sharpness, yerr=errors, fmt='o', ecolor='red', capsize=5)
-    sns.lineplot(x=list_of_values, y=list_of_sharpness)
+    plt.errorbar(list_of_values, list_of_sharpness_mean, yerr=errors, fmt='o', ecolor='red', capsize=5)
+    sns.lineplot(x=list_of_values, y=list_of_sharpness_mean)
     plt.xlabel(effect_name)
     plt.ylabel("Sharpness")
     
     #save the plot
     plt.savefig(f"results/{model_class_name}_{optimizer}_{effect_name}.png")
     
-    
-    plt.show()
+    if show_plot:
+        plt.show()    
     
     
 
@@ -231,7 +219,7 @@ def get_sharpness_stats(model_name, models, n_iterations):
         n_iterations (int): Number of iterations to calculate sharpness over.
 
     Returns:
-        tuple: Mean sharpness, left interval, and right interval.
+        tuple: Mean sharpness, left interval, right interval, and the list of sharpness values.
     """
     list_of_sharpness = []
     for i in range(n_iterations):
@@ -252,12 +240,52 @@ def get_sharpness_stats(model_name, models, n_iterations):
     left_interval = mean_sharpness - margin_error
     right_interval = mean_sharpness + margin_error
 
-    return mean_sharpness, left_interval, right_interval
+    return mean_sharpness, left_interval, right_interval, sharpness_values.tolist()
 
 
 if __name__ == '__main__':
-    mp.set_start_method('spawn', force=True)
-    models = iterate_over_models(array_iterations=[0,1,2,3,4,5], model_class_name='MLP_1', base_seed=42, unit_test=True) 
-    show_results(LEARNING_RATES, models, "Learning Rate", "MLP_1", 'SGD', 5)
-    #show_results(BATCH_SIZES, models, "Batch size", "MLP_1", 'AdaGrad', 2)
+    
+    model_class_name = 'MLP_1'
+    optimizer = 'AdaGrad'
+    effect_name = "LearningRate"
+    array_iterations = [0, 1, 2, 3, 4, 5]
+    effect = LEARNING_RATES
+    
+    run(effect, effect_name, model_class_name, optimizer, array_iterations)
+    plot_results(effect_name, model_class_name, optimizer, show_plot = False)
 
+    #--------------------------------------------------------------------------------------------
+
+    model_class_name = 'MLP_1'
+    optimizer = 'AdaGrad'
+    effect_name = "Batchsize"
+    array_iterations = [0, 1, 2, 3, 4, 5]
+    effect = BATCH_SIZES
+        
+    run(effect, effect_name, model_class_name, optimizer, array_iterations)
+    plot_results(effect_name, model_class_name, optimizer, show_plot = False)
+
+    
+    #--------------------------------------------------------------------------------------------
+
+    
+    model_class_name = 'MLP_1'
+    optimizer = 'SGD'
+    effect_name = "LearningRate"
+    array_iterations = [0, 1, 2, 3, 4, 5]
+    effect = LEARNING_RATES
+    
+    run(effect, effect_name, model_class_name, optimizer, array_iterations)
+    plot_results(effect_name, model_class_name, optimizer, show_plot = False)
+    
+    #--------------------------------------------------------------------------------------------
+
+    
+    model_class_name = 'MLP_1'
+    optimizer = 'SGD'
+    effect_name = "Batchsize"
+    array_iterations = [0, 1, 2, 3, 4, 5]
+    effect = BATCH_SIZES
+    
+    run(effect, effect_name, model_class_name, optimizer, array_iterations)
+    plot_results(effect_name, model_class_name, optimizer, show_plot = False)

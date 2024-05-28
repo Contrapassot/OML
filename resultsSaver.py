@@ -1,11 +1,14 @@
 import json
 
 class sharpnessResultsSaver:
-    def __init__(self, effect = None, effect_name = None, list_of_sharpness = None, list_of_values = None, errors = None, model_class_name='MLP_1', optimizer='SGD', n_iterations=5, save = True):
+    def __init__(self, effect = None, effect_name = None, list_of_sharpness_mean = None, 
+                 list_of_sharpness = None, list_of_values = None, errors = None, model_class_name='MLP_1', optimizer='SGD', 
+                 n_iterations=5, save = True):
         
         if save:
             self.effect = effect
             self.effect_name = effect_name
+            self.list_of_sharpness_mean = list_of_sharpness_mean
             self.list_of_sharpness = list_of_sharpness
             self.list_of_values = list_of_values
             self.errors = errors
@@ -18,6 +21,7 @@ class sharpnessResultsSaver:
             try:
                 assert effect is not None
                 assert effect_name is not None
+                assert list_of_sharpness_mean is not None
                 assert list_of_sharpness is not None
                 assert list_of_values is not None
                 assert errors is not None
@@ -38,6 +42,7 @@ class sharpnessResultsSaver:
         result = {
             "effect": self.effect,
             "effect_name": self.effect_name,
+            "list_of_sharpness_mean": self.list_of_sharpness_mean, 
             "list_of_sharpness": self.list_of_sharpness,
             "list_of_values": self.list_of_values,
             "errors": self.errors,
