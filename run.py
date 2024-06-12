@@ -205,7 +205,22 @@ def plot_results(effect_name, model_class_name, optimizer, show_plot):
     
     if show_plot:
         plt.show()    
-    
+
+from plot_results import plot_effect_vs_optimizer
+from plot_results import batch_effect, batch_effect_name, batch_sharpness, batch_errors, batch_optimizers
+from plot_results import lr_effect, lr_effect_name, lr_sharpness, lr_errors, lr_optimizers
+
+def plot_results_2():
+    fig, ax = plt.subplots(1, 2, figsize=(13, 6))
+
+    plot_effect_vs_optimizer(batch_effect, batch_effect_name, batch_sharpness, batch_errors, batch_optimizers, 
+                                'semilogx', side_by_side=False, fig=fig, axs=[ax[0]])
+    plot_effect_vs_optimizer(lr_effect, lr_effect_name, lr_sharpness, lr_errors, lr_optimizers,
+                                'semilogx', side_by_side=False, fig=fig, axs=[ax[1]])
+    ax[0].text(0.02, 0.1, r'\textbf{(a)}', transform=ax[0].transAxes, fontsize=30, verticalalignment='top')
+    ax[1].text(0.02, 0.1, r'\textbf{(b)}', transform=ax[1].transAxes, fontsize=30, verticalalignment='top')
+
+    plt.show()     
     
 
 
@@ -252,10 +267,13 @@ if __name__ == '__main__':
     effect = LEARNING_RATES
     
     run(effect, effect_name, model_class_name, optimizer, array_iterations)
-    plot_results(effect_name, model_class_name, optimizer, show_plot = False)
+    plot_results(effect_name, model_class_name, optimizer, show_plot = True)
+
+    # Uncomment this to see the plots from the paper (same plots as plot_results(...) but different layout)
+    # plot_results_2()
 
     #--------------------------------------------------------------------------------------------
-
+    """""
     model_class_name = 'MLP_1'
     optimizer = 'AdaGrad'
     effect_name = "Batchsize"
@@ -289,3 +307,4 @@ if __name__ == '__main__':
     
     run(effect, effect_name, model_class_name, optimizer, array_iterations)
     plot_results(effect_name, model_class_name, optimizer, show_plot = False)
+    """

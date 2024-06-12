@@ -16,6 +16,7 @@ transform = transforms.Compose(
 
 train_set = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
 test_set = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
+DIR = './data/cifar-10-batches-py/'
 
 
 class CIFAR10Dataset(Dataset):
@@ -41,9 +42,6 @@ def unpickle(file):
     with open(file, 'rb') as fo:
         dict = pickle.load(fo, encoding='bytes')
     return dict
-
-
-DIR = './data/cifar-10-batches-py/'
 
 
 def load_batches():

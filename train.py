@@ -158,4 +158,5 @@ def learn(model, model_name, batch_size, learning_rate, optimizer, tensorboard_p
 
 
 if __name__ == '__main__':
-    learn('MLP_1', 128, 1e-4, 'SGD', tensorboard_path="./tensorboard", iteration_number=0)
+    model = get_model("MLP_1")
+    learn(model, 'MLP_1', 128, 1e-4, 'SGD', tensorboard_path="./tensorboard", iteration_number=0)
