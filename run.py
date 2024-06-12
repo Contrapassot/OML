@@ -5,15 +5,16 @@ import os
 from train import learn, get_model
 import copy
 from sharpness_estimation import get_sharpness
-import seaborn as sns
-import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as stats
-from concurrent.futures import ProcessPoolExecutor
+
 import torch.multiprocessing as mp
 import hashlib
 import warnings
 from resultsSaver import sharpnessResultsSaver
+
+from plot_results import plot_results_2  
+from plot_results import plot_results
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -183,45 +184,7 @@ def run(effect, effect_name, model_class_name='MLP_1', optimizer='SGD', array_it
     
     assert saver.results is not None
     
-  
 
-
-def plot_results(effect_name, model_class_name, optimizer, show_plot):
-    
-    saver = sharpnessResultsSaver(model_class_name=model_class_name, optimizer=optimizer, effect_name = effect_name)
-    
-    list_of_sharpness_mean = saver.results['list_of_sharpness_mean']
-    list_of_values = saver.results['list_of_values']
-    errors = saver.results['errors']
-   
-    plt.figure(figsize=(10, 6))
-    plt.errorbar(list_of_values, list_of_sharpness_mean, yerr=errors, fmt='o', ecolor='red', capsize=5)
-    sns.lineplot(x=list_of_values, y=list_of_sharpness_mean)
-    plt.xlabel(effect_name)
-    plt.ylabel("Sharpness")
-    
-    #save the plot
-    plt.savefig(f"results/{model_class_name}_{optimizer}_{effect_name}.png")
-    
-    if show_plot:
-        plt.show()    
-
-from plot_results import plot_effect_vs_optimizer
-from plot_results import batch_effect, batch_effect_name, batch_sharpness, batch_errors, batch_optimizers
-from plot_results import lr_effect, lr_effect_name, lr_sharpness, lr_errors, lr_optimizers
-
-def plot_results_2():
-    fig, ax = plt.subplots(1, 2, figsize=(13, 6))
-
-    plot_effect_vs_optimizer(batch_effect, batch_effect_name, batch_sharpness, batch_errors, batch_optimizers, 
-                                'semilogx', side_by_side=False, fig=fig, axs=[ax[0]])
-    plot_effect_vs_optimizer(lr_effect, lr_effect_name, lr_sharpness, lr_errors, lr_optimizers,
-                                'semilogx', side_by_side=False, fig=fig, axs=[ax[1]])
-    ax[0].text(0.02, 0.1, r'\textbf{(a)}', transform=ax[0].transAxes, fontsize=30, verticalalignment='top')
-    ax[1].text(0.02, 0.1, r'\textbf{(b)}', transform=ax[1].transAxes, fontsize=30, verticalalignment='top')
-
-    plt.show()     
-    
 
 
 def get_sharpness_stats(model_name, models, n_iterations):
@@ -270,7 +233,7 @@ if __name__ == '__main__':
     plot_results(effect_name, model_class_name, optimizer, show_plot = True)
 
     # Uncomment this to see the plots from the paper (same plots as plot_results(...) but different layout)
-    # plot_results_2()
+    plot_results_2()
 
     #--------------------------------------------------------------------------------------------
     """""
