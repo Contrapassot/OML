@@ -15,7 +15,7 @@
 
 In `run.py`, choose your experiment parameters and called the functions `run()` and `plot_results()`
 
-Example usage:
+Example usage (already set up in `run.py`):
 
 ```
 model_class_name = 'MLP_1'
