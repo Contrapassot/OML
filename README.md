@@ -39,7 +39,7 @@ The results are saved in json files in the folder `./results`. Therefore, the `r
 
 To produce the results, the models need to be trained already. For that, the function `get_model_ready()` will train the model if it doesn't exist in the `./models` folder. 
 
-Training the models takes **more than 24 hours** since we train until convergence and have a lot of models. You can consider training fewer models with hand selected hyperparameters by changing the LEARNING_RATES and BATCH_SIZES variables at the beginning of the run.py script. You can also change the array_iterations variable called by the `run()` function to have fewer iterations (the numbers in the array are here for reproducibility, but you can use any number you want, what matters for the number of networks trained is the length of the array). 
+Training the models takes **about 24 hours** (rtx 3090) since we train until convergence and have a lot of models. You can consider training fewer models with hand selected hyperparameters by changing the LEARNING_RATES and BATCH_SIZES variables at the beginning of the run.py script. You can also change the array_iterations variable called by the `run()` function to have fewer iterations (the numbers in the array are here for reproducibility, but you can use any number you want, what matters for the number of networks trained is the length of the array). 
 
 Estimating the local minimum sharpness also takes some time (15-30 minutes) which can be reduced by having fewer measures (change the variable NUM_TRIALS at the beginning of the script `sharpness_estimation.py`).
 
