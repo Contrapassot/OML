@@ -1,5 +1,9 @@
 # How Learning Rate, Batch Size, and Optimizer Influence Model Sharpness
 
+## Overview
+
+This repository contains the code for our project. Our study investigates how different hyperparameters affect the sharpness of the minima in a multilayer perceptron trained on CIFAR-10. The repository also includes the final report with results and analysis.
+
 ## Table of Contents
 - [How to use](#how-to-use)
 - [Data Loader](#dataloader)
